@@ -3,6 +3,7 @@ import Ballons._
 import Defenders._
 import Appl.stage
 import Bullets.Bullet
+import Coins.Coin
 import javafx.scene.paint.ImagePattern
 import jdk.jfr.internal.consumer.EventLog.stop
 import scalafx.animation.AnimationTimer
@@ -13,11 +14,13 @@ import scalafx.scene.Scene
 import scalafx.scene.effect.{BlendMode, DropShadow}
 import scalafx.scene.image.Image
 import scalafx.scene.input.TouchPoint.State
-import scalafx.scene.layout.HBox
+import scalafx.scene.layout.{HBox, Pane, StackPane}
 import scalafx.scene.paint.Color._
 import scalafx.scene.paint._
 import scalafx.scene.shape.Rectangle
 import scalafx.scene.text.Text
+import scalafx.Includes._
+import scalafx.scene.input.RotateEvent.Rotate
 
 import java.lang.Thread.sleep
 import java.nio.file.Paths
@@ -32,6 +35,7 @@ object Appl extends JFXApp3 {
     val v4 = new Vector2D(180, 350)
 
     var money = 0
+    val coin = new Coin()
 
     var ballonsList: List[Ballon] = List(new FastBallon(v1), new SlowBallon(v2), new BossBallon(v1+v2))
     var defendersList: List[Defender] = List(new FastDefender(v3), new SlowDefender(v4))
@@ -52,7 +56,7 @@ object Appl extends JFXApp3 {
 
       objectsToDraw = objectsToDraw ::: defendersList.map{defender =>
         var rectangle = new Rectangle {
-          x = defender.position.x
+          x  = defender.position.x
           y = defender.position.y
           width = 50
           height = 50
@@ -63,7 +67,7 @@ object Appl extends JFXApp3 {
 
       objectsToDraw = objectsToDraw ::: bulletsList.map { bullet =>
         var rectangle = new Rectangle {
-          x = bullet.position.x
+          x =  bullet.position.x
           y = bullet.position.y
           width = 20
           height = 20
@@ -132,7 +136,33 @@ object Appl extends JFXApp3 {
         content = objectsToDraw
 
         state.onChange(Platform.runLater {
-          content = objectsToDraw
+
+          val text = new Text {
+            text = money.toString
+            style = "-fx-font-size: 100pt"
+            x = 110
+            y = 100
+            fill = new LinearGradient(
+              stops = Stops(Yellow, Orange)
+            )}
+
+          val coinRectangle = new Rectangle {
+            x = 0
+            width = 100
+            height = 100
+          }
+
+          coinRectangle.setFill(coin.imgPattern)
+
+          val myPane = new Pane()
+
+          myPane.getChildren.add(coinRectangle)
+          myPane.getChildren.add(text)
+          objectsToDraw.foreach{
+            rectangle =>
+              myPane.getChildren.add(rectangle)
+          }
+          content = myPane
         })
       }
     }
