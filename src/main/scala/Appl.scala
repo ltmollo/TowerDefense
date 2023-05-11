@@ -1,29 +1,17 @@
-import Vectors._
 import Ballons._
-import Defenders._
-import Appl.stage
 import Bullets.Bullet
 import Coins.Coin
-import javafx.scene.paint.ImagePattern
-import jdk.jfr.internal.consumer.EventLog.stop
+import Defenders._
+import Vectors._
 import scalafx.animation.AnimationTimer
 import scalafx.application.{JFXApp3, Platform}
-import scalafx.beans.property.{IntegerProperty, ObjectProperty}
-import scalafx.geometry.Insets
+import scalafx.beans.property.ObjectProperty
 import scalafx.scene.Scene
-import scalafx.scene.effect.{BlendMode, DropShadow}
-import scalafx.scene.image.Image
-import scalafx.scene.input.TouchPoint.State
-import scalafx.scene.layout.{HBox, Pane, StackPane}
+import scalafx.scene.layout.Pane
 import scalafx.scene.paint.Color._
 import scalafx.scene.paint._
 import scalafx.scene.shape.Rectangle
 import scalafx.scene.text.Text
-import scalafx.Includes._
-import scalafx.scene.input.RotateEvent.Rotate
-
-import java.lang.Thread.sleep
-import java.nio.file.Paths
 
 
 object Appl extends JFXApp3 {
@@ -91,11 +79,6 @@ object Appl extends JFXApp3 {
         }
         else {
           ballonsList = ballonsList.filterNot(_ == ballon)
-          val mons: List[Ballon] = List(new FastBallon(v1))
-          ballonsList = ballonsList ::: mons
-        }
-        if (ballonsList.isEmpty) {
-          // end game
         }
 
         defendersList.foreach{defender =>
