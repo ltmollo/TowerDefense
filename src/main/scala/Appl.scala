@@ -2,6 +2,7 @@ import Ballons._
 import Bullets.Bullet
 import Coins.Coin
 import Defenders._
+import Graphics.{DrawMoney, DrawRectangle}
 import Vectors._
 import scalafx.animation.AnimationTimer
 import scalafx.application.{JFXApp3, Platform}
@@ -21,9 +22,10 @@ object Appl extends JFXApp3 {
     val v2 = new Vector2D(25, 65)
     val v3 = new Vector2D(90, 250)
     val v4 = new Vector2D(180, 350)
-
     var money = 0
     val coin = new Coin()
+    val drawRectangle = new DrawRectangle()
+    val drawMoney = new DrawMoney()
 
     var ballonsList: List[Ballon] = List(new FastBallon(v1), new SlowBallon(v2), new BossBallon(v1+v2))
     var defendersList: List[Defender] = List(new FastDefender(v3), new SlowDefender(v4))
@@ -31,38 +33,21 @@ object Appl extends JFXApp3 {
     var objectsToDraw: List[Rectangle] = List()
 
     def addRectanglesToDraw(): Unit = {
-      objectsToDraw = ballonsList.map{ ballon =>
-        var rectangle = new Rectangle {
-          x = ballon.position.x
-          y = ballon.position.y
-          width = 50
-          height = 60
-        }
-        rectangle.setFill(ballon.imgPattern)
-        rectangle
+
+      objectsToDraw = List(drawRectangle(coin.position, 100, 100, coin.imgPattern))
+
+      objectsToDraw = objectsToDraw ::: ballonsList.map{ ballon =>
+        drawRectangle(ballon.position, 50, 60, ballon.imgPattern)
       }
 
       objectsToDraw = objectsToDraw ::: defendersList.map{defender =>
-        var rectangle = new Rectangle {
-          x  = defender.position.x
-          y = defender.position.y
-          width = 50
-          height = 50
-        }
-        rectangle.setFill(defender.imgPattern)
-        rectangle
+        drawRectangle(defender.position, 50, 50, defender.imgPattern)
       }
 
       objectsToDraw = objectsToDraw ::: bulletsList.map { bullet =>
-        var rectangle = new Rectangle {
-          x =  bullet.position.x
-          y = bullet.position.y
-          width = 20
-          height = 20
-        }
-        rectangle.setFill(bullet.imgPattern)
-        rectangle
+        drawRectangle(bullet.position, 20, 20, bullet.imgPattern)
       }
+
     }
 
     val state = ObjectProperty(ballonsList.last.position)
@@ -120,26 +105,10 @@ object Appl extends JFXApp3 {
 
         state.onChange(Platform.runLater {
 
-          val text = new Text {
-            text = money.toString
-            style = "-fx-font-size: 100pt"
-            x = 110
-            y = 100
-            fill = new LinearGradient(
-              stops = Stops(Yellow, Orange)
-            )}
-
-          val coinRectangle = new Rectangle {
-            x = 0
-            width = 100
-            height = 100
-          }
-
-          coinRectangle.setFill(coin.imgPattern)
+          val text = drawMoney(money)
 
           val myPane = new Pane()
 
-          myPane.getChildren.add(coinRectangle)
           myPane.getChildren.add(text)
           objectsToDraw.foreach{
             rectangle =>
