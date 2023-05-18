@@ -6,7 +6,7 @@ class Vector2D(var x: Double, var y:Double){
   def +(other: Vector2D) = new Vector2D(x + other.x, y + other.y)
   def -(other: Vector2D) = new Vector2D(x - other.x, y - other.y)
 
-  def *(k: Double): Vector2D = new Vector2D(x*k.toDouble, y*k.toDouble)
+  def *(k: Double): Vector2D = new Vector2D(x*k, y*k)
   def unary_- = new Vector2D(-x, -y)
   def toUpperRight(other: Vector2D): Boolean = x <= other.x && y <= other.y
   def toLowerLeft(other: Vector2D): Boolean = x >= other.x && y >= other.y

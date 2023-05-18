@@ -8,6 +8,7 @@ class FastBallon(position: Vector2D) extends Ballon(position){
   maxHealth = 100
   currentHealth = maxHealth
   reward = 7
-  val image = new Image("resources/ballons/red.png")
+  speed = 2
+  private val image = new Image("resources/ballons/red.png")
   imgPattern = new ImagePattern(image)
 }

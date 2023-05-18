@@ -8,6 +8,8 @@ package Ballons
     var currentHealth : Int = _
     var imgPattern : ImagePattern = _
     var reward : Int = _
+    var speed : Double = _
+    var moveVectorIndex: Int = 0
     def changePosition(newPosition: Vector2D): Unit = {position = newPosition}
     override def toString() = "Ballon" + " " + position.toString()
   }

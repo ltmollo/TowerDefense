@@ -8,6 +8,7 @@ class BossBallon (position: Vector2D) extends Ballon(position){
   maxHealth = 200
   currentHealth = maxHealth
   reward = 10
-  val image = new Image("resources/ballons/blue.png")
+  speed = 1.5
+  private val image = new Image("resources/ballons/blue.png")
   imgPattern = new ImagePattern(image)
 }

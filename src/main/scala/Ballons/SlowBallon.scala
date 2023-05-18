@@ -8,6 +8,7 @@ class SlowBallon(position: Vector2D) extends Ballon(position){
   maxHealth = 150
   currentHealth = maxHealth
   reward = 5
-  val image = new Image("resources/ballons/green.png")
+  speed = 1
+  private val image = new Image("resources/ballons/green.png")
   imgPattern = new ImagePattern(image)
 }
