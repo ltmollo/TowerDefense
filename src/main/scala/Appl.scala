@@ -32,7 +32,7 @@ object Appl extends JFXApp3 {
     val myMap = new Map
 
     var ballonsList: List[Ballon] = List(new FastBallon(beginVector), new SlowBallon(beginVector), new BossBallon(beginVector))
-    var defendersList: List[Defender] = List()
+    var defendersList: List[Defender] = List(new FastDefender(new Vector2D(530, 250)))
     var bulletsList: List[Bullet] = List()
     var objectsToDraw: List[Rectangle] = List()
 
