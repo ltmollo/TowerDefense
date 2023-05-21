@@ -3,6 +3,7 @@ package Ballons
 import Vectors.Vector2D
 
 class MoveBallon extends Function1[Ballon, Boolean]{
+
   private val north = new Vector2D(0, -0.5)
   private val east = new Vector2D(0.5, 0)
   private val south = new Vector2D(0, 0.5)
