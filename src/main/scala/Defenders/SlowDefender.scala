@@ -10,5 +10,5 @@ class SlowDefender(position: Vector2D) extends Defender(position){
   private val image = new Image("resources/defenders/pink.png")
   imgPattern = new ImagePattern(image)
   coolDown = 150
-  range = 120
+  range = 160
 }

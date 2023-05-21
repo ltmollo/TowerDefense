@@ -3,7 +3,7 @@ import Bullets.Bullet
 import Coins.Coin
 import Defenders.DefenderChoice.Choice._
 import Defenders._
-import Graphics.{DrawMapObjects, DrawRectangle, DrawText}
+import Graphics.{DrawMapObjects, DrawText}
 import Vectors._
 import Maps._
 import scalafx.animation.AnimationTimer
@@ -21,24 +21,23 @@ import scalafx.scene.shape.Rectangle
 object Appl extends JFXApp3 {
 
   override def start(): Unit = {
-    val beginVector = new Vector2D(0, 170)
-
-    var money = 1000
+    var money = 20
     var health = 3
+    var round = 1
+    var ballonsLeft = 2
     val coin = new Coin()
-    val drawRectangle = new DrawRectangle()
     val drawText = new DrawText()
     val moveBallon = new MoveBallon()
     val setDefenderChoice = new SetDefenderChoice()
     val drawDefenderMenu = new DefendersMenu()
     val addNewDefender = new AddDefender()
+    val addNewBallon = new BallonManager()
     val drawMapObjects = new DrawMapObjects()
     val myMap = new Map
     var defenderChoice : Choice = FastDefender
 
-
-    var ballonsList: List[Ballon] = List(new FastBallon(beginVector), new SlowBallon(beginVector), new BossBallon(beginVector))
-    var defendersList: List[Defender] = List(new FastDefender(new Vector2D(530, 250)))
+    var ballonsList: List[Ballon] = List(new FastBallon(new Vector2D(0, 170)))
+    var defendersList: List[Defender] = List()
     var bulletsList: List[Bullet] = List()
     val defendersToChoose: List[Defender] = List(new FastDefender(new Vector2D(0, 250)),
       new SlowDefender(new Vector2D(0, 360)), new RangeDefender(new Vector2D(0, 470)))
@@ -49,12 +48,17 @@ object Appl extends JFXApp3 {
 
 
     val timer = AnimationTimer { now =>
+
+      if(!defendersList.isEmpty){
+
       ballonsList.foreach{ ballon =>
 
         if(!moveBallon(ballon)) {
           ballonsList = ballonsList.filterNot(_ == ballon)
-          ballonsList = ballonsList ::: List(new FastBallon(beginVector))
           health -= 1
+          if(health == 0){
+            stopApp()
+          }
         }
 
         defendersList.foreach{defender =>
@@ -62,7 +66,7 @@ object Appl extends JFXApp3 {
             val damage = defender.shoot()
             if(damage > 0){
               val bullet = new Bullet(defender.position + new Vector2D(15, 15), ballon, damage)
-              bulletsList = bulletsList ::: List(bullet)
+              bulletsList = bulletsList :+ bullet
             }
           }
         }
@@ -80,19 +84,49 @@ object Appl extends JFXApp3 {
       defendersList.foreach(defender => defender.decreaseCoolDown())
       objectsToDraw = drawMapObjects(myMap, coin, ballonsList, defendersList, bulletsList)
 
-      if(ballonsList.isEmpty){
-        state.value = defendersList.last.position
+      if(ballonsList.isEmpty && ballonsLeft == 0){
+        round += 1
+        ballonsLeft = round * 5
       }
-      else state.value = ballonsList.last.position
+      else if(ballonsList.isEmpty) {state.value = defendersList.last.position}
+        else{
+        state.value = ballonsList.last.position
+      }
+      if(ballonsLeft > 0){
+        val newBallon = addNewBallon()
+        if (newBallon != null) {
+          ballonsLeft -= 1
+          ballonsList = ballonsList :+ newBallon
+        }
+        }
+    }}
+
+    timer.start()
+
+    def updateMap(): Pane = {
+      val moneyText = drawText(money, 100, 110, 100, "money")
+      val healthText = drawText(health, 100, 1100, 100, "health")
+      val roundText = drawText(round, 100, 550, 100, "round")
+      val myPane = new Pane()
+
+      myPane.getChildren.add(moneyText)
+      myPane.getChildren.add(healthText)
+      myPane.getChildren.add(roundText)
+      objectsToDraw.foreach {
+        rectangle =>
+          myPane.getChildren.addAll(rectangle)
+      }
+      myPane.getChildren.add(drawDefenderMenu(defendersToChoose, money, coin))
+      myPane
     }
-    timer.start() // Uruchamiamy AnimationTimer
 
     stage = new JFXApp3.PrimaryStage {
       width = 1200
       height = 800
       scene = new Scene {
         fill = White
-        content = objectsToDraw
+        objectsToDraw = drawMapObjects(myMap, coin, ballonsList, defendersList, bulletsList)
+        content = updateMap()
 
 
         onMouseClicked = (event: MouseEvent) => {
@@ -119,19 +153,7 @@ object Appl extends JFXApp3 {
         }
 
         state.onChange(Platform.runLater {
-
-          val moneyText = drawText(money, 100, 110 ,100, "money")
-          val healthText = drawText(health, 100, 1100 ,100, "health")
-          val myPane = new Pane()
-
-          myPane.getChildren.add(moneyText)
-          myPane.getChildren.add(healthText)
-          objectsToDraw.foreach{
-            rectangle =>
-              myPane.getChildren.addAll(rectangle)
-          }
-          myPane.getChildren.add(drawDefenderMenu(defendersToChoose, money, coin))
-          content = myPane
+          content = updateMap()
         })
       }
     }

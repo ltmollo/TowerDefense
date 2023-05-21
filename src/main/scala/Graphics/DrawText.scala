@@ -1,6 +1,6 @@
 package Graphics
 
-import scalafx.scene.paint.Color.{Orange, OrangeRed, Pink, Yellow}
+import scalafx.scene.paint.Color.{Black, Gray, Orange, OrangeRed, Pink, Yellow}
 import scalafx.scene.paint.{LinearGradient, Stops}
 import scalafx.scene.text.Text
 
@@ -21,6 +21,9 @@ class DrawText extends Function5[Int, Int, Double, Double, String, Text]{
       }
       case "health" => {
         text.fill = new LinearGradient(stops = Stops(Pink, OrangeRed))
+      }
+      case "round" => {
+        text.fill = new LinearGradient(stops = Stops(Gray, Black))
       }
     }
     text
