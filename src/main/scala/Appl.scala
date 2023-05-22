@@ -1,3 +1,4 @@
+import Arrows.Arrow
 import Ballons._
 import Bullets.Bullet
 import Coins.Coin
@@ -16,15 +17,18 @@ import scalafx.scene.layout.Pane
 import scalafx.scene.paint.Color._
 import scalafx.scene.shape.Rectangle
 
+import scala.math.ceil
+
 
 
 object Appl extends JFXApp3 {
 
   override def start(): Unit = {
-    var money = 20
+    var money = 22
     var health = 3
     var round = 1
     var ballonsLeft = 2
+    var runGame = false
     val coin = new Coin()
     val drawText = new DrawText()
     val moveBallon = new MoveBallon()
@@ -49,72 +53,85 @@ object Appl extends JFXApp3 {
 
     val timer = AnimationTimer { now =>
 
-      if(!defendersList.isEmpty){
+      if((!defendersList.isEmpty || runGame) && health > 0){
 
-      ballonsList.foreach{ ballon =>
+        ballonsList.foreach{ ballon =>
 
-        if(!moveBallon(ballon)) {
-          ballonsList = ballonsList.filterNot(_ == ballon)
-          health -= 1
-          if(health == 0){
-            stopApp()
+          if(!moveBallon(ballon)) {
+            ballonsList = ballonsList.filterNot(_ == ballon)
+            health -= 1
+            if(health == 0){
+              stopApp()
+            }
           }
-        }
 
-        defendersList.foreach{defender =>
-          if(defender.checkRange(ballon.position)) {
-            val damage = defender.shoot()
-            if(damage > 0){
-              val bullet = new Bullet(defender.position + new Vector2D(15, 15), ballon, damage)
-              bulletsList = bulletsList :+ bullet
+          defendersList.foreach{defender =>
+            if(defender.checkRange(ballon.position)) {
+              val damage = defender.shoot()
+              if(damage > 0){
+                val bullet = new Bullet(defender.position + new Vector2D(15, 15), ballon, damage)
+                bulletsList = bulletsList :+ bullet
+              }
             }
           }
         }
-      }
 
-      bulletsList.foreach{bullet =>
-        if(bullet.move()){
-            bulletsList = bulletsList.filterNot(_ == bullet)
-            if(bullet.target.currentHealth <= 0){
-              ballonsList = ballonsList.filterNot(_ == bullet.target)
-              money += bullet.target.reward
+        bulletsList.foreach{bullet =>
+          if(bullet.move()){
+              bulletsList = bulletsList.filterNot(_ == bullet)
+              if(bullet.target.currentHealth <= 0){
+                ballonsList = ballonsList.filterNot(_ == bullet.target)
+                money += ceil(bullet.target.reward/(round)).toInt
+              }
+          }
+        }
+        defendersList.foreach(defender => defender.decreaseCoolDown())
+        objectsToDraw = drawMapObjects(myMap, coin, ballonsList, defendersList, bulletsList)
+
+        if(ballonsList.isEmpty && ballonsLeft == 0){
+          round += 1
+          ballonsLeft = round * 5
+        }
+        else if(ballonsList.isEmpty) {
+          if(defendersList.nonEmpty){
+            state.value = defendersList.last.position
+          }
+          else if(bulletsList.nonEmpty){
+            state.value = bulletsList.last.position
+          }
+          else state.value = coin.position
+        }
+          else{
+          state.value = ballonsList.last.position
+        }
+        if(ballonsLeft > 0){
+          val newBallon = addNewBallon()
+            if (newBallon != null) {
+              ballonsLeft -= 1
+              ballonsList = ballonsList :+ newBallon
             }
-        }
-      }
-      defendersList.foreach(defender => defender.decreaseCoolDown())
-      objectsToDraw = drawMapObjects(myMap, coin, ballonsList, defendersList, bulletsList)
+          }
+        runGame = true
 
-      if(ballonsList.isEmpty && ballonsLeft == 0){
-        round += 1
-        ballonsLeft = round * 5
       }
-      else if(ballonsList.isEmpty) {state.value = defendersList.last.position}
-        else{
-        state.value = ballonsList.last.position
-      }
-      if(ballonsLeft > 0){
-        val newBallon = addNewBallon()
-        if (newBallon != null) {
-          ballonsLeft -= 1
-          ballonsList = ballonsList :+ newBallon
-        }
-        }
-    }}
+    }
 
     timer.start()
 
     def updateMap(): Pane = {
-      val moneyText = drawText(money, 100, 110, 100, "money")
-      val healthText = drawText(health, 100, 1100, 100, "health")
-      val roundText = drawText(round, 100, 550, 100, "round")
+      val moneyText = drawText(money.toString, 100, 110, 100, "money")
+      val roundText = drawText(round.toString, 100, 550, 100, "round")
       val myPane = new Pane()
 
-      myPane.getChildren.add(moneyText)
-      myPane.getChildren.add(healthText)
-      myPane.getChildren.add(roundText)
+      for (i <- 1 to health) {
+        val heartText = drawText("❤", 120, 1020 - (i-1) * 140, 110, "health")
+        myPane.getChildren.add(heartText)
+      }
+
+      myPane.getChildren.addAll(moneyText, roundText)
       objectsToDraw.foreach {
         rectangle =>
-          myPane.getChildren.addAll(rectangle)
+          myPane.getChildren.add(rectangle)
       }
       myPane.getChildren.add(drawDefenderMenu(defendersToChoose, money, coin))
       myPane
@@ -137,6 +154,13 @@ object Appl extends JFXApp3 {
           if(clickVector.toLowerLeft(defendersToChoose.head.position) &&
           clickVector.toUpperRight(defendersToChoose.last.position + new Vector2D(80, 110))) {
             defenderChoice = setDefenderChoice(clickVector)
+          }
+          else if(clickVector.toLowerLeft(defendersToChoose.head.position) &&
+            clickVector.toUpperRight(defendersToChoose.last.position + new Vector2D(80, 190))){
+            if(addNewDefender.rewind()){
+              money += defendersList.last.cost
+              defendersList = defendersList.init
+            }
           }
           else if(!clickVector.toLowerLeft(new Vector2D(0, 120))){
             println("Wrong place")

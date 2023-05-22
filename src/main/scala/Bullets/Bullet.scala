@@ -15,7 +15,6 @@ class Bullet(var position: Vector2D, val target: Ballon, val damage: Int){
     position += moveVector()
     if((position - target.position - vectorToMiddle).length < 1.5){
       target.currentHealth -= damage
-      println(target.currentHealth)
       return true
     }
     false

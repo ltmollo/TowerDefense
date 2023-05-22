@@ -25,7 +25,6 @@ class Defender(var position: Vector2D){
   def shoot(): Int = {
     if (currentCoolDown == 0) {
       currentCoolDown = coolDown + 1
-      println("shotted")
       damage
     }
     else 0

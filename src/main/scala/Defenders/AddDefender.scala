@@ -16,6 +16,8 @@ class AddDefender extends Function3[Vector2D, Choice, Int, Defender]{
     (new Vector2D(774, 210), new Vector2D(830, 705)),
     (new Vector2D(774, 650), new Vector2D(1200, 705)))
 
+  var defendersOnMap: List[Defender] = List()
+
   def checkBorders(position: Vector2D): Boolean = {
     for((corner1, corner2) <- mapBorders) {
       if(position.toLowerLeft(corner1) && position.toUpperRight(corner2)){
@@ -25,10 +27,28 @@ class AddDefender extends Function3[Vector2D, Choice, Int, Defender]{
     }
     true
   }
+
+  def checkDefenders(position: Vector2D): Boolean = {
+
+    for(defender <- defendersOnMap){
+      if(position.distance(defender.position) < 40){
+        return false
+      }
+    }
+    true
+  }
+
+  def rewind(): Boolean = {
+    if(defendersOnMap.nonEmpty) {
+      defendersOnMap = defendersOnMap.init
+    }
+      return true
+    false
+  }
   def apply(position: Vector2D, defenderChoice: Choice, money: Int): Defender = {
     val defenderPosition = position - new Vector2D(25, 25)
 
-    if(!checkBorders(defenderPosition)){ return null}
+    if(!checkBorders(defenderPosition) || !checkDefenders(defenderPosition)){ return null}
 
     val newDefender: Defender = defenderChoice match {
       case FastDefender => new FastDefender(defenderPosition)
@@ -37,6 +57,7 @@ class AddDefender extends Function3[Vector2D, Choice, Int, Defender]{
 
     }
     if (newDefender.cost <= money) {
+      defendersOnMap = defendersOnMap :+ newDefender
       return newDefender
     }
     null
