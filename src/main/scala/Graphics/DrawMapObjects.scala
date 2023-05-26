@@ -8,7 +8,7 @@ import Defenders.Defender
 import Vectors.Vector2D
 import scalafx.scene.shape.Rectangle
 
-class DrawMapObjects extends Function5[Map, Coin, List[Ballon], List[Defender], List[Bullet], List[Rectangle]]{
+class DrawMapObjects extends ((Map, Coin, List[Ballon], List[Defender], List[Bullet]) => List[Rectangle]){
   val drawRectangle = new DrawRectangle()
   def apply(myMap: Map, coin: Coin, ballonsList: List[Ballon], defendersList: List[Defender],
             bulletsList: List[Bullet]): List[Rectangle] = {
